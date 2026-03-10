@@ -109,6 +109,36 @@ fun MainScreen() {
             ) {
                 Text("Позвонить другу")
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    val text = inputText.trim()
+
+                    if (text.isEmpty()) {
+                        Toast.makeText(context, "Введите текст для отправки", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, text)
+                    }
+
+                    val chooser = Intent.createChooser(shareIntent, "Поделиться через…")
+
+                    if (shareIntent.resolveActivity(context.packageManager) == null) {
+                        Toast.makeText(context, "Нет приложений для отправки текста", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    context.startActivity(chooser)
+                }
+            ) {
+                Text("Поделиться текстом")
+            }
         }
     }
 }
