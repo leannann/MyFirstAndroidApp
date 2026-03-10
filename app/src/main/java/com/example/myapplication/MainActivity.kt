@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     val context = LocalContext.current
     var inputText by rememberSaveable { mutableStateOf("") }
+    var inputError by rememberSaveable { mutableStateOf<String?>(null) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -52,23 +53,52 @@ fun MainScreen() {
         ) {
             OutlinedTextField(
                 value = inputText,
-                onValueChange = { inputText = it },
+                onValueChange = {
+                    inputText = it
+                    inputError = null
+                },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Введите текст") },
-                singleLine = true
+                label = { Text("Введите текст или телефон") },
+                singleLine = true,
+                isError = inputError != null,
+                supportingText = {
+                    if (inputError != null) {
+                        Text(inputError!!)
+                    }
+                }
             )
+
+            fun requireNonEmptyText(): String? {
+                val text = inputText.trim()
+                return if (text.isEmpty()) {
+                    inputError = "Поле не должно быть пустым"
+                    null
+                } else {
+                    text
+                }
+            }
+
+            fun requireValidPhone(): String? {
+                val phone = inputText.trim()
+                return when {
+                    phone.isEmpty() -> {
+                        inputError = "Введите номер телефона"
+                        null
+                    }
+                    !Patterns.PHONE.matcher(phone).matches() -> {
+                        inputError = "Некорректный номер телефона"
+                        null
+                    }
+                    else -> phone
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    val text = inputText.trim()
-
-                    if (text.isEmpty()) {
-                        Toast.makeText(context, "Введите текст", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
+                    val text = requireNonEmptyText() ?: return@Button
 
                     val intent = Intent(context, SecondActivity::class.java).apply {
                         putExtra(MainActivity.EXTRA_TEXT, text)
@@ -84,23 +114,14 @@ fun MainScreen() {
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    val phone = inputText.trim()
-
-                    if (phone.isEmpty()) {
-                        Toast.makeText(context, "Введите номер телефона", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
-                    if (!Patterns.PHONE.matcher(phone).matches()) {
-                        Toast.makeText(context, "Некорректный номер телефона", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
+                    val phone = requireValidPhone() ?: return@Button
 
                     val dialIntent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:$phone")
+                        data = Uri.parse("tel:${Uri.encode(phone)}")
                     }
 
                     if (dialIntent.resolveActivity(context.packageManager) == null) {
-                        Toast.makeText(context, "Нет приложения для звонков", Toast.LENGTH_SHORT).show()
+                        inputError = "На устройстве нет приложения «Телефон»"
                         return@Button
                     }
 
@@ -115,12 +136,7 @@ fun MainScreen() {
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    val text = inputText.trim()
-
-                    if (text.isEmpty()) {
-                        Toast.makeText(context, "Введите текст для отправки", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
+                    val text = requireNonEmptyText() ?: return@Button
 
                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
@@ -130,7 +146,7 @@ fun MainScreen() {
                     val chooser = Intent.createChooser(shareIntent, "Поделиться через…")
 
                     if (shareIntent.resolveActivity(context.packageManager) == null) {
-                        Toast.makeText(context, "Нет приложений для отправки текста", Toast.LENGTH_SHORT).show()
+                        inputError = "Нет приложений для отправки текста"
                         return@Button
                     }
 
