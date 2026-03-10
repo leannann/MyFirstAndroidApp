@@ -1,7 +1,9 @@
 package com.example.myapplication
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -63,7 +65,6 @@ fun MainScreen() {
                 onClick = {
                     val text = inputText.trim()
 
-                    // Мини-валидация (на пункт 1 уже нормально)
                     if (text.isEmpty()) {
                         Toast.makeText(context, "Введите текст", Toast.LENGTH_SHORT).show()
                         return@Button
@@ -76,6 +77,37 @@ fun MainScreen() {
                 }
             ) {
                 Text("Открыть вторую Activity")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    val phone = inputText.trim()
+
+                    if (phone.isEmpty()) {
+                        Toast.makeText(context, "Введите номер телефона", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (!Patterns.PHONE.matcher(phone).matches()) {
+                        Toast.makeText(context, "Некорректный номер телефона", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    val dialIntent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:$phone")
+                    }
+
+                    if (dialIntent.resolveActivity(context.packageManager) == null) {
+                        Toast.makeText(context, "Нет приложения для звонков", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    context.startActivity(dialIntent)
+                }
+            ) {
+                Text("Позвонить другу")
             }
         }
     }
