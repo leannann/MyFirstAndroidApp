@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppDetailsScreen(
+    appId: Int,
     onBack: () -> Unit
 ) {
     Scaffold { padding ->
@@ -20,7 +21,11 @@ fun AppDetailsScreen(
                 .fillMaxSize()
         ) {
             Text(text = "Карточка приложения (заглушка)")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "appId: $appId")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(onClick = onBack) {
                 Text(text = "Назад")
             }
