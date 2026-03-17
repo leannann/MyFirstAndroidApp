@@ -4,28 +4,48 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.myapplication.data.repository.FakeAppsRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.feature.appslist.presentation.AppsListEvent
+import com.example.myapplication.feature.appslist.presentation.AppsListViewModel
 import com.example.myapplication.ui.components.*
 import com.example.myapplication.ui.util.UiDimens
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AppsListScreen(
-    onAppClick: (Int) -> Unit
+    onAppClick: (Int) -> Unit,
+    viewModel: AppsListViewModel = viewModel()
 ) {
-    val apps = remember { FakeAppsRepository.getApps() }
-    var searchQuery by rememberSaveable { mutableStateOf("") } // пока без фильтрации
+    val state by viewModel.state.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        RuStoreTopBar(onMenuClick = {})
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(Unit) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                AppsListEvent.ShowLogoSnack -> {
+                    snackbarHostState.showSnackbar("Логотип RuStore")
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            RuStoreTopBar(
+                onLogoClick = viewModel::onLogoClick,
+                onMenuClick = {}
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
         Column(
             modifier = Modifier
+                .padding(padding)
                 .fillMaxSize()
                 .background(Color(0xFFF3F5F8))
                 .padding(UiDimens.ScreenPadding)
@@ -37,20 +57,20 @@ fun AppsListScreen(
                 Column {
                     Box(modifier = Modifier.padding(UiDimens.SearchPadding)) {
                         SearchField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it }
+                            value = state.searchQuery,
+                            onValueChange = viewModel::onSearchQueryChanged
                         )
                     }
 
                     LazyColumn {
-                        itemsIndexed(apps) { index, app ->
+                        itemsIndexed(state.apps) { index, app ->
                             AppListItem(
                                 app = app,
-                                onClick = { clickedApp ->
-                                    onAppClick(clickedApp.id)
+                                onClick = { clicked ->
+                                    onAppClick(clicked.id)
                                 }
                             )
-                            if (index != apps.lastIndex) {
+                            if (index != state.apps.lastIndex) {
                                 AppListDivider()
                             }
                         }

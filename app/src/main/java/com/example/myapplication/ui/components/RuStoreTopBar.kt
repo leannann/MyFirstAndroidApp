@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -16,6 +17,7 @@ import com.example.myapplication.ui.util.UiDimens
 
 @Composable
 fun RuStoreTopBar(
+    onLogoClick: () -> Unit,
     onMenuClick: () -> Unit
 ) {
     Surface(color = Color(0xFF3D6AE6)) {
@@ -34,6 +36,7 @@ fun RuStoreTopBar(
                     .size(UiDimens.TopBarLogoSize)
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White.copy(alpha = 0.18f))
+                    .clickable(onClick = onLogoClick)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
