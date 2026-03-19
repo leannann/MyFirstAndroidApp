@@ -9,14 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.myapplication.data.model.AppUiModel
-import com.example.myapplication.ui.util.UiDimens
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.domain.apps.model.App
+import com.example.myapplication.ui.util.UiDimens
 
 @Composable
 fun AppListItem(
-    app: AppUiModel,
-    onClick: (AppUiModel) -> Unit
+    app: App,
+    onClick: (App) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -28,14 +28,12 @@ fun AppListItem(
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AppIconPlaceholder(title = app.title, seed = app.iconPlaceholderSeed)
+        AppIconPlaceholder(title = app.title, seed = app.id)
 
         Spacer(modifier = Modifier.width(UiDimens.ItemSpacing))
 
         Column(modifier = Modifier.weight(1f)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = app.title,
                     style = MaterialTheme.typography.titleMedium,

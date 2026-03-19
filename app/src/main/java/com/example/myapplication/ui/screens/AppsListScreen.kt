@@ -9,17 +9,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.feature.appslist.presentation.AppsListEvent
-import com.example.myapplication.feature.appslist.presentation.AppsListViewModel
+import com.example.myapplication.presentation.appslist.AppsListEvent
+import com.example.myapplication.presentation.appslist.AppsListViewModel
+import com.example.myapplication.presentation.appslist.AppsListViewModelFactory
 import com.example.myapplication.ui.components.*
 import com.example.myapplication.ui.util.UiDimens
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AppsListScreen(
-    onAppClick: (Int) -> Unit,
-    viewModel: AppsListViewModel = viewModel()
+    onAppClick: (Int) -> Unit
 ) {
+    val viewModel: AppsListViewModel = viewModel(factory = AppsListViewModelFactory())
     val state by viewModel.state.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
